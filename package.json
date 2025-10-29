@@ -15,6 +15,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx ./db/migrate.ts"
   },
+  "resolutions": {
+    "next": "15.5.2"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.33.7",
     "@heroui/avatar": "^2.2.22",
@@ -35,7 +38,7 @@
     "imagekit": "^6.0.0",
     "imagekitio-next": "^1.0.1",
     "lucide-react": "^0.546.0",
-    "next": "15.5.6",
+    "next": "15.5.2",
     "next-themes": "^0.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -44,7 +47,6 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
