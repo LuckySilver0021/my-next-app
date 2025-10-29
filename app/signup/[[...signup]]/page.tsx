@@ -1,12 +1,13 @@
-import SignUpForm from "@/components/SignUpForm"
+"use client";
 
+import { SignUp } from "@clerk/nextjs";
 
-const page = () => {
+export default function Page() {
   return (
-    <div>
-        <SignUpForm />
+    <div className="w-full flex justify-center py-12">
+      <div className="w-full max-w-md">
+        <SignUp path="/signup" routing="path" signInUrl="/signin" />
+      </div>
     </div>
-  )
+  );
 }
-
-export default page

@@ -44,7 +44,7 @@ export default function UserProfile() {
             variant="solid"
             color="primary"
             size="lg"
-            onClick={() => router.push("/sign-in")}
+            onClick={() => router.push("/signin")}
             className="px-8"
             endContent={<ArrowRight className="h-4 w-4" />}
           >

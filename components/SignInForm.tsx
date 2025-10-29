@@ -18,7 +18,7 @@ export default function SignInForm() {
   const router = useRouter();
   const { signIn, isLoaded, setActive } = useSignIn();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [authError, setAuthError] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -34,32 +34,39 @@ export default function SignInForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      setAuthError("Authentication system is not ready. Please try again.");
+      return;
+    }
 
     setIsSubmitting(true);
-    setAuthError("");
+    setAuthError(null);
 
     try {
       const result = await signIn.create({
-        identifier: data.identifier,
+        identifier: data.identifier.trim(),
         password: data.password,
       });
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         router.push("/dashboard");
-      } else {
+      }
+      else {
         console.error("Sign-in incomplete:", result);
-        setAuthError("Please check your email and password and try again.");
+        setAuthError("Sign-in could not be completed. Please try again.");
       }
     } catch (error: any) {
       console.error("Sign-in error:", error);
-      if (error.errors?.[0]?.message) {
-        setAuthError(error.errors[0].message);
-      } else if (error.message) {
-        setAuthError(error.message);
+      if (error.errors?.[0]?.code === "form_identifier_not_found") {
+        setAuthError("No account found with this email address.");
+      } else if (error.errors?.[0]?.code === "form_password_incorrect") {
+        setAuthError("Incorrect password. Please try again.");
       } else {
-        setAuthError("An error occurred during sign-in. Please try again.");
+        setAuthError(
+          error.errors?.[0]?.message ||
+            "An error occurred during sign-in. Please try again."
+        );
       }
     } finally {
       setIsSubmitting(false);

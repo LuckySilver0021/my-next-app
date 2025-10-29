@@ -56,6 +56,10 @@ export default function FileUploadForm({
 
       setFile(selectedFile);
       setError(null);
+
+      // Auto-upload immediately
+      // Use the selectedFile directly to avoid relying on state update timing
+      void uploadFile(selectedFile);
     }
   };
 
@@ -72,6 +76,9 @@ export default function FileUploadForm({
 
       setFile(droppedFile);
       setError(null);
+
+      // Auto-upload immediately for dropped files
+      void uploadFile(droppedFile);
     }
   };
 
@@ -87,11 +94,16 @@ export default function FileUploadForm({
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
+  // New helper to upload a specific File object.
+  const uploadFile = async (fileToUpload: File) => {
+    if (!fileToUpload) return;
+    if (uploading) {
+      console.warn("Upload already in progress, skipping new upload.");
+      return;
+    }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", fileToUpload);
     formData.append("userId", userId);
     if (currentFolder) {
       formData.append("parentId", currentFolder);
@@ -102,27 +114,23 @@ export default function FileUploadForm({
     setError(null);
 
     try {
-console.log("1️⃣ Upload clicked, file:", file);
-console.log("2️⃣ FormData:", Array.from(formData.entries()));
-console.log("3️⃣ Ready to POST...");
-        console.log("FormData instanceof FormData:", formData instanceof FormData);
-
+      console.log("Auto-upload starting for file:", fileToUpload.name);
       const response = await axios.post("/api/files/upload", formData, {
-    onUploadProgress: (progressEvent) => {
-      if (progressEvent.total) {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setProgress(percentCompleted);
-      }
-    },
-  });
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          }
+        },
+      });
 
-      console.log("Upload response USS:", response);
+      console.log("Auto upload response:", response);
 
       addToast({
         title: "Upload Successful",
-        description: `${file.name} has been uploaded successfully.`,
+        description: `${fileToUpload.name} has been uploaded successfully.`,
         color: "success",
       });
 
@@ -137,23 +145,23 @@ console.log("3️⃣ Ready to POST...");
       console.log("Error uploading file:", {
         response: error.response,
         message: error.message,
-        status: error.response?.status
+        status: error.response?.status,
       });
-      
+
       let errorMessage = "Failed to upload file. Please try again.";
-      
+
       if (error.response?.data) {
         // Try to extract error message from response
-        if (typeof error.response.data === 'string') {
+        if (typeof error.response.data === "string") {
           // If it's HTML, give a generic error
-          errorMessage = error.response.data.includes('<!DOCTYPE html>') 
+          errorMessage = error.response.data.includes("<!DOCTYPE html>")
             ? "Server error occurred. Please try again."
             : error.response.data;
         } else if (error.response.data.message) {
           errorMessage = error.response.data.message;
         }
       }
-      
+
       setError(errorMessage);
       addToast({
         title: "Upload Failed",
@@ -163,6 +171,12 @@ console.log("3️⃣ Ready to POST...");
     } finally {
       setUploading(false);
     }
+  };
+
+  // Keep a legacy handler for the manual Upload button
+  const handleUpload = async () => {
+    if (!file) return;
+    await uploadFile(file);
   };
 
   const handleCreateFolder = async () => {

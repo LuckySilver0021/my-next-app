@@ -20,11 +20,15 @@ export async function PATCH(request: NextRequest,props:{params:Promise<{fileId:s
             return new NextResponse("File not found", { status: 404 });
         }
 
-        const updatedFile = await db.update(files).set({ isStarred: !files.isStarred }).where(and(eq(files.id, fileId),eq(files.userId,userId))).returning();
-        
-        const firstStarerd=updatedFile[0];
+                // Toggle based on the current DB value we just read
+                const updatedFile = await db.update(files)
+                    .set({ isStarred: !starredFile.isStarred })
+                    .where(and(eq(files.id, fileId), eq(files.userId, userId)))
+                    .returning();
 
-        return NextResponse.json({ firstStarerd });
+                const firstStarred = updatedFile[0];
+
+                return NextResponse.json({ firstStarred });
 
     }catch(error){
         console.error("Fetching files error:", error);

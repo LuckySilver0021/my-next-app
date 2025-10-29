@@ -76,7 +76,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-5">
           <SignedOut>
-            <Link href="/sign-in">
+            <Link href="/signin">
               <Button variant="flat" color="primary">
                 Sign In
               </Button>
@@ -191,7 +191,7 @@ export default function Navbar() {
             className="md:hidden bg-white dark:bg-neutral-950 border-t border-default-200 dark:border-default-800 shadow-lg px-6 py-4 space-y-3"
           >
             <SignedOut>
-              <Link href="/sign-in" onClick={() => setMenuOpen(false)}>
+              <Link href="/signin" onClick={() => setMenuOpen(false)}>
                 <Button variant="flat" color="primary" className="w-full">
                   Sign In
                 </Button>

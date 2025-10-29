@@ -115,24 +115,29 @@ export default function FileList({
 
   const handleStarFile = async (fileId: string) => {
     try {
-      await axios.patch(`/api/files/${fileId}/starred`);
+      const response = await axios.patch(`/api/files/${fileId}/starred`);
 
-      // Update local state
-      setFiles(
-        files.map((file) =>
-          file.id === fileId ? { ...file, isStarred: !file.isStarred } : file
-        )
-      );
+      // Use server response to update local state (avoid optimistic mismatch)
+      const newFile = response.data?.firstStarred;
+      if (newFile) {
+        setFiles(
+          files.map((file) =>
+            file.id === fileId ? { ...file, isStarred: newFile.isStarred } : file
+          )
+        );
 
-      // Show toast
-      const file = files.find((f) => f.id === fileId);
-      addToast({
-        title: file?.isStarred ? "Removed from Starred" : "Added to Starred",
-        description: `"${file?.name}" has been ${
-          file?.isStarred ? "removed from" : "added to"
-        } your starred files`,
-        color: "success",
-      });
+        // Show toast based on new state
+        const updated = files.find((f) => f.id === fileId);
+        const newState = newFile.isStarred;
+        addToast({
+          title: newState ? "Added to Starred" : "Removed from Starred",
+          description: `"${updated?.name}" has been ${newState ? "added to" : "removed from"} your starred files`,
+          color: "success",
+        });
+      } else {
+        // Fallback to refetch if server didn't return the updated row
+        await fetchFiles();
+      }
     } catch (error) {
       console.error("Error starring file:", error);
       addToast({
