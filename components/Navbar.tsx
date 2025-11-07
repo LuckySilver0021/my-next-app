@@ -196,7 +196,7 @@ export default function Navbar() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/sign-up" onClick={() => setMenuOpen(false)}>
+              <Link href="/signup" onClick={() => setMenuOpen(false)}>
                 <Button variant="solid" color="primary" className="w-full">
                   Sign Up
                 </Button>
@@ -234,3 +234,4 @@ export default function Navbar() {
     </motion.header>
   );
 }
+
